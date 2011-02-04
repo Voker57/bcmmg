@@ -62,15 +62,19 @@ client.received_messages.each do |m|
 		this_user.save
 		client.deliver(m.from.to_s, "Your bitcoin address is #{this_user["address"]}. Your balance is #{user_balance(this_user)} mBC. Your auto-generated nick is #{this_user["nick"]}, NICK anothernick to change it. Send HELP to get started.")
 	end
-	if m.body =~ /^HELLO/
+	split_string = m.body.split(" ")
+	command = split_string[0]
+	args = split_string[1..-1]
+	case
+	when command == "HELLO"
 		client.deliver(m.from.to_s, "Why, hello, #{this_user["jid"]}.")
- 	elsif m.body =~ /^ADDRESS/
+ 	when command == "ADDRESS"
  		client.deliver(m.from.to_s, "Your bitcoin address is #{this_user["address"]}")
- 	elsif m.body =~ /^BALANCE/
+ 	when command == "BALANCE"
  		client.deliver(m.from.to_s, "Your current balance is #{user_balance(this_user)} mBC")
-	elsif m.body =~ /^TAKE/
-		if m.body.split(" ")[1]
-			bet_id = m.body.split(" ")[1]
+	when command == "TAKE"
+		if args[0]
+			bet_id = args[0]
 			real_balance = user_balance(this_user)
 			if ex_bet = Wannabe.find("bets", "id" => bet_id, "state" => "open")
 				if ex_bet["amount"] <= real_balance
@@ -102,9 +106,9 @@ client.received_messages.each do |m|
 		else
 			client.deliver(m.from.to_s, "Congratulations, you didn't enter any bet ID!")
 		end
-	elsif m.body =~ /^BET/
-		if m.body.split(" ")[1] and m.body.split(" ")[1].to_i > 0
-			bet_size = m.body.split(" ")[1].to_i.abs
+	when command == "BET"
+		if args[0].to_i > 0
+			bet_size = args[0].to_i
 			this_user = Wannabe.find("users", "jid" => m.from.strip.to_s)
 			real_balance = user_balance(this_user)
 			if bet_size <= real_balance
@@ -121,13 +125,13 @@ client.received_messages.each do |m|
 		else
 			client.deliver(m.from.to_s, "Zero bet created OK!")
 		end
-	elsif m.body =~ /^LSBETS/
+	when command == "LSBETS"
 		msg = "Last 10 bets"
 		Wannabe.select('bets', {"state" => "open"}, :sort => ["created_at", :desc], :limit => 10) do |bet|
 			msg << "\n" << print_bet(bet)
 		end
 		client.deliver(m.from.to_s, msg)
-	elsif m.body =~ /^HELP/
+	when command == "HELP"
 		msg = "Welcome to BitCoin MMG, the Money Making Game!
 
 Money Making Game is simple -- you put up a bet, and then someone else pays the same amount that you put up to take the bet. Then one of you gets all of the money. Doesn't it sound fair?
@@ -154,10 +158,10 @@ Feedback:
 
 voker57@gmail.com"
 		client.deliver(m.from.to_s, msg)
-	elsif m.body =~ /^HALP/
+	when command == "HALP"
 		client.deliver(m.from.to_s, "SLM")
-	elsif m.body =~ /^NICK/ and m.body.split(" ")[1]
-		new_nick = m.body.split(" ")[1]
+	when (command == "NICK" and args[0])
+		new_nick = args[0]
 		if Wannabe.find('users', {"nick" => new_nick})
 			client.deliver(m.from.to_s, "Nick already taken")
 		elsif ! (new_nick =~ /^[A-Za-z0-9]+$/)
@@ -167,13 +171,13 @@ voker57@gmail.com"
 			this_user.save
 			client.deliver(m.from.to_s, "Nick changed!")
 		end
-	elsif m.body =~ /^GIVE/ and config[:admins].include? m.from.strip.to_s
+	when (command == "GIVE" and config[:admins].include? m.from.strip.to_s)
 		user = Wannabe.find('users', "jid" => m.body.split(" ")[1])
 		user["spent"] -= m.body.split(" ")[2].to_i
 		user.save
 		client.deliver(m.from.to_s, "Given! Now it's #{user_balance(user)}")
 	else
-		client.deliver(m.from.to_s, "No such command. HELP for list.")
+		client.deliver(m.from.to_s, "No such command or wrong syntax. HELP for list.")
 	end
 # 	rescue Interrupt => e
 #   		raise e
