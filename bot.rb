@@ -69,9 +69,16 @@ client.received_messages.each do |m|
 	when command == "HELLO"
 		client.deliver(m.from.to_s, "Why, hello, #{this_user["jid"]}.")
  	when command == "ADDRESS"
- 		client.deliver(m.from.to_s, "Your bitcoin address is #{this_user["address"]}")
+ 		client.deliver(m.from.to_s, "Your bitcoin address is #{this_user["address"]}. Please wait a bit for transaction to get confirmation after sending bitcoins.")
  	when command == "BALANCE"
- 		client.deliver(m.from.to_s, "Your current balance is #{user_balance(this_user)} mBC")
+ 		if (config[:admins].include? m.from.strip.to_s) and args[0]
+ 			user = Wannabe.find('users', "jid" => args[0])
+ 			if user
+ 				client.deliver(m.from.to_s, "User's current balance is #{user_balance(user)} mBC")
+ 			end
+ 		else
+			client.deliver(m.from.to_s, "Your current balance is #{user_balance(this_user)} mBC")
+		end
 	when command == "TAKE"
 		if args[0]
 			bet_id = args[0]
