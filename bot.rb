@@ -91,7 +91,7 @@ client.received_messages.each do |m|
 					this_user.save
 					client.deliver(m.from.to_s, "Bet withdrawn")
 				elsif ex_bet["amount"] <= real_balance
-					to_user = Wannabe.find('users', ex_bet["to"])
+					to_user = this_user
 					from_user = Wannabe.find('users', ex_bet["from"])
 					if rand(2) == 0
 						ex_bet["state"] = "wont"
@@ -195,25 +195,32 @@ voker57@gmail.com"
 		user["spent"] -= args[1].to_i
 		user.save
 		client.deliver(m.from.to_s, "Given! Now it's #{user_balance(user)}")
+# 	when (command == "MSG" and config[:admins].include? m.from.strip.to_s)
 	when (command == "CASHOUT" and args[0])
 		amount = if args[1].to_i > 0
 			args[1].to_i
 		else
 			user_balance(this_user)
 		end
-		if amount <= user_balance(this_user) and amount != 0
-			if args[0] =~ /^[A-Za-z0-9]+$/
-				`bitcoind sendtoaddress #{args[0]} #{amount.to_f/1000.0}`
-				puts "bitcoind sendtoaddress #{args[0]} #{amount.to_f/1000.0}"
-				Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
-				this_user["spent"] += amount
-				this_user.save
-				client.deliver(m.from.to_s, "#{amount.to_f/1000.0} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
-			else
-				client.deliver(m.from.to_s, "Not a bitcoin address")
-			end
+		if amount < 10
+			client.deliver(m.from.to_s, "Sadly, BitCoin can't deliver such small amounts")
 		else
-			client.deliver(m.from.to_s, "Not enough money.")
+			# Hack
+			amount = sprintf("%.2f",(amount.to_f/1000.0)).to_f
+			if amount <= user_balance(this_user) and amount != 0.0
+				if args[0] =~ /^[A-Za-z0-9]+$/
+					`bitcoind sendtoaddress #{args[0]} #{amount}`
+					puts "bitcoind sendtoaddress #{args[0]} #{amount}"
+					Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
+					this_user["spent"] += (amount * 1000.0)
+					this_user.save
+					client.deliver(m.from.to_s, "#{amount} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
+				else
+					client.deliver(m.from.to_s, "Not a bitcoin address")
+				end
+			else
+				client.deliver(m.from.to_s, "Can't send such amount of money.")
+			end
 		end
 	else
 		client.deliver(m.from.to_s, "No such command or wrong syntax. HELP for list.")
