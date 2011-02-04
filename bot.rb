@@ -149,7 +149,7 @@ Commands:
 
 ADDRESS: Prints your personal bitcoin address. Send money there to add them to your balance.
 BALANCE: Prints your current balance.
-TAKE bet_id: Take other player's bet, or take back your own.
+TAKE bet_id: Take other player's bet, or withdraw your own.
 BET amount: Place a new bet. Fractions are not OK.
 LSBETS: Get last 10 open bets.
 NICK new_nick: Change nick
