@@ -95,6 +95,7 @@ client.received_messages.each do |m|
 					from_user = Wannabe.find('users', ex_bet["from"])
 					if rand(2) == 0
 						ex_bet["state"] = "wont"
+						ex_bet["to_user"] = to_user["_id"]
 						ex_bet.save
 						to_user["spent"] -= ex_bet["amount"]
 						to_user.save
@@ -102,6 +103,7 @@ client.received_messages.each do |m|
 						client.deliver(from_user["jid"], "Congratulations, you lost bet #{ex_bet["id"]} (#{ex_bet["amount"]} mBC) to #{to_user["nick"]}!")
 					else
 						ex_bet["state"] = "wonf"
+						ex_bet["to_user"] = to_user["_id"]
 						ex_bet.save
 						to_user["spent"] += ex_bet["amount"]
 						to_user.save
@@ -195,7 +197,7 @@ voker57@gmail.com"
 		user["spent"] -= args[1].to_i
 		user.save
 		client.deliver(m.from.to_s, "Given! Now it's #{user_balance(user)}")
-# 	when (command == "MSG" and config[:admins].include? m.from.strip.to_s)
+#  	when (command == "MSG" and config[:admins].include? m.from.strip.to_s)
 	when (command == "CASHOUT" and args[0])
 		amount = if args[1].to_i > 0
 			args[1].to_i
