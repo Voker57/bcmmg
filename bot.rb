@@ -183,7 +183,7 @@ voker57@gmail.com"
 		end
 	when (command == "GIVE" and config[:admins].include? m.from.strip.to_s)
 		user = Wannabe.find('users', "jid" => m.body.split(" ")[1])
-		user["spent"] -= m.body.split(" ")[2].to_i
+		user["spent"] -= args[1].to_i
 		user.save
 		client.deliver(m.from.to_s, "Given! Now it's #{user_balance(user)}")
 	when (command == "CASHOUT" and args[0])
@@ -192,13 +192,13 @@ voker57@gmail.com"
 		else
 			user_balance(this_user)
 		end
-		if amount >= user_balance(this_user)
+		if amount <= user_balance(this_user)
 			if args[0] =~ /^[A-Za-z0-9]+$/
-				`bitcoind sendtoaddress #{args[0]} #{amount/1000}`
+				`bitcoind sendtoaddress #{args[0]} #{amount.to_f/1000.0}`
 				Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
 				this_user["spent"] += amount
 				this_user.save
-				client.deliver(m.from.to_s, "#{amount/1000} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
+				client.deliver(m.from.to_s, "#{amount.to_f/1000.0} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
 			else
 				client.deliver(m.from.to_s, "Not a bitcoin address")
 			end
