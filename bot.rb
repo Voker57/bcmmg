@@ -153,6 +153,7 @@ TAKE bet_id: Take other player's bet, or withdraw your own.
 BET amount: Place a new bet. Fractions are not OK.
 LSBETS: Get last 10 open bets.
 NICK new_nick: Change nick
+CASHOUT bc_address [amount]: Send some (or all) of your current balance to a certain bitcoin address.
 HELP: This help.
 
 Examples:
@@ -185,6 +186,25 @@ voker57@gmail.com"
 		user["spent"] -= m.body.split(" ")[2].to_i
 		user.save
 		client.deliver(m.from.to_s, "Given! Now it's #{user_balance(user)}")
+	when (command == "CASHOUT" and args[0])
+		amount = if args[1].to_i > 0
+			args[1].to_i
+		else
+			user_balance(this_user)
+		end
+		if amount >= user_balance(this_user)
+			if args[0] =~ /^[A-Za-z0-9]+$/
+				`bitcoind sendtoaddress #{args[0]} #{amount/1000}`
+				Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
+				this_user["spent"] += amount
+				this_user.save
+				client.deliver(m.from.to_s, "#{amount/1000} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
+			else
+				client.deliver(m.from.to_s, "Not a bitcoin address")
+			end
+		else
+			client.deliver(m.from.to_s, "Not enough money.")
+		end
 	else
 		client.deliver(m.from.to_s, "No such command or wrong syntax. HELP for list.")
 	end
