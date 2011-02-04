@@ -77,7 +77,13 @@ client.received_messages.each do |m|
 			bet_id = args[0]
 			real_balance = user_balance(this_user)
 			if ex_bet = Wannabe.find("bets", "id" => bet_id, "state" => "open")
-				if ex_bet["amount"] <= real_balance
+				if ex_bet["from"] == this_user["_id"]
+					this_user["spent"] -= ex_bet["amount"]
+					ex_bet["state"] = "withdrawn"
+					ex_bet.save
+					this_user.save
+					client.deliver(m.from.to_s, "Bet withdrawn")
+				elsif ex_bet["amount"] <= real_balance
 					to_user = Wannabe.find('users', ex_bet["to"])
 					from_user = Wannabe.find('users', ex_bet["from"])
 					if rand(2) == 0
@@ -140,7 +146,7 @@ Commands:
 
 ADDRESS: Prints your personal bitcoin address. Send money there to add them to your balance.
 BALANCE: Prints your current balance.
-TAKE bet_id: Take other player's bet.
+TAKE bet_id: Take other player's bet, or take back your own.
 BET amount: Place a new bet. Fractions are not OK.
 LSBETS: Get last 10 open bets.
 NICK new_nick: Change nick
