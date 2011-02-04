@@ -118,7 +118,10 @@ client.received_messages.each do |m|
 			this_user = Wannabe.find("users", "jid" => m.from.strip.to_s)
 			real_balance = user_balance(this_user)
 			if bet_size <= real_balance
-				bet_id = rand(666666).to_s(16)
+				bet_id = nil
+				begin
+					bet_id = rand(666666).to_s(16)
+				end while Wannabe.find('bets', 'id' => bet_id)
 				bet = Wannabe.new('bets', "id" => bet_id, "amount" => bet_size, "from" => this_user["_id"], "created_at" => DateTime.now.strftime("%s").to_i, "state" => "open")
 				bet.save
 				this_user["spent"] += bet_size
