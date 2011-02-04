@@ -143,7 +143,9 @@ client.received_messages.each do |m|
 	when command == "HELP"
 		msg = "Welcome to BitCoin MMG, the Money Making Game!
 
-Money Making Game is simple -- you put up a bet, and then someone else pays the same amount that you put up to take the bet. Then one of you gets all of the money. Doesn't it sound fair?
+Money Making Game is simple -- you place a bet, and then someone else pays the same amount of money that you used to place a bet. Then random one of you gets all the money.
+
+Normally there'll be a small percentage for the house substracted, but it's free for now!
 
 Commands:
 
