@@ -58,7 +58,7 @@ client.received_messages.each do |m|
 	this_user = Wannabe.find("users", "jid" => m.from.strip.to_s)
 	
 	unless this_user
-		this_user = Wannabe.new("users", { "jid" => m.from.strip.to_s, "spent" => -1, "address" => `bitcoind getnewaddress`.strip, "nick" => genname })
+		this_user = Wannabe.new("users", { "jid" => m.from.strip.to_s, "spent" => 0, "address" => `bitcoind getnewaddress`.strip, "nick" => genname })
 		this_user.save
 		client.deliver(m.from.to_s, "Your bitcoin address is #{this_user["address"]}. Your balance is #{user_balance(this_user)} mBC. Your auto-generated nick is #{this_user["nick"]}, NICK anothernick to change it. Send HELP to get started.")
 	end
