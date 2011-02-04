@@ -160,7 +160,7 @@ voker57@gmail.com"
 		new_nick = m.body.split(" ")[1]
 		if Wannabe.find('users', {"nick" => new_nick})
 			client.deliver(m.from.to_s, "Nick already taken")
-		elsif ! (new_nick =~ /^A-Za-z0-9$/)
+		elsif ! (new_nick =~ /^[A-Za-z0-9]+$/)
 			client.deliver(m.from.to_s, "Alphanumerics only please")
 		else
 			this_user["nick"] = new_nick
