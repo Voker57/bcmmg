@@ -214,7 +214,7 @@ voker57@gmail.com"
 					`bitcoind sendtoaddress #{args[0]} #{amount}`
 					puts "bitcoind sendtoaddress #{args[0]} #{amount}"
 					Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
-					this_user["spent"] += (amount * 1000.0)
+					this_user["spent"] += (amount * 1000.0).to_i
 					this_user.save
 					client.deliver(m.from.to_s, "#{amount} bitcoins sent to #{args[0]}. Thank you for playing MMG!")
 				else
