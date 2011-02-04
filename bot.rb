@@ -170,8 +170,8 @@ voker57@gmail.com"
 		new_nick = args[0]
 		if Wannabe.find('users', {"nick" => new_nick})
 			client.deliver(m.from.to_s, "Nick already taken")
-		elsif ! (new_nick =~ /^[A-Za-z0-9]+$/)
-			client.deliver(m.from.to_s, "Alphanumerics only please")
+		elsif ! (new_nick =~ /^[A-Za-z0-9]+$/ and new_nick.size < 41)
+			client.deliver(m.from.to_s, "40 chars max, alphanumerics only please")
 		else
 			this_user["nick"] = new_nick
 			this_user.save
