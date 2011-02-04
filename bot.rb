@@ -194,9 +194,10 @@ voker57@gmail.com"
 		else
 			user_balance(this_user)
 		end
-		if amount <= user_balance(this_user)
+		if amount <= user_balance(this_user) and amount != 0
 			if args[0] =~ /^[A-Za-z0-9]+$/
 				`bitcoind sendtoaddress #{args[0]} #{amount.to_f/1000.0}`
+				puts "bitcoind sendtoaddress #{args[0]} #{amount.to_f/1000.0}"
 				Wannabe.new('cashouts', "user" => this_user["_id"], "amount" => amount, "created_at" => DateTime.now.strftime("%s").to_i).save
 				this_user["spent"] += amount
 				this_user.save
