@@ -35,8 +35,7 @@ migrations = [
  			user.save
 		end
 	end,
-	lambda do 
-		Wannabe.drop_indexes('bets')
+	lambda do
 		Wannabe.create_index('bets', 'id')
 		Wannabe.create_index('bets', 'amount')
 		Wannabe.create_index('bets', 'from')
@@ -57,7 +56,7 @@ while db_version <= (migrations.size - 1)
 	puts "Migrating to version #{db_version + 1}..."
 	migrations[db_version].call
 	db_version += 1
+	db_version_hash["value"] = db_version
+	db_version_hash.save
 end
 
-db_version_hash["value"] = db_version
-db_version_hash.save
