@@ -42,7 +42,7 @@ $client = client
 
 def user_balance(user)
 	balance = `bitcoind getreceivedbyaddress #{user["address"]} #{$config[:min_confirmations]}`.strip.to_f * 1000
-	balance - user["spent"]
+	balance.to_i - user["spent"]
 end
 
 def print_bet(bet)
